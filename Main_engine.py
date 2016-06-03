@@ -36,28 +36,32 @@ class dictionary:
 
     def edit_dict(self, param, word1, word2=False):
         #Edits the dictionary add, remove and change *may be remove
+        #Returns false if the input is invalid
         flag = False
         self.new_data = self.dict_list
 
+        #Adds the word into the dictionary if valid and new
         if (param == Dict_Param.add and
-        	self.check_valid_input(word1)):
+        	self._check_valid_input(word1)):
 
             if not word1 in self.new_data:
                 self.new_data.append(word1)
                 write_file(self.DICT_PATH, self.new_data)
                 flag = True
 
+        #Removes the word if in the dictionary
         elif (param == Dict_Param.remove and
-        	self.check_valid_input(word1)):
+        	self._check_valid_input(word1)):
 
             if word1 in self.new_data:
                 del self.new_data[self.new_data.index(word1)]
                 write_file(self.DICT_PATH, self.new_data)
                 flag = True
         
+        #Edits the word by removing the old and adding the new if valid
         elif (param == Dict_Param.change and
-        	self.check_valid_input(word1) and
-        	self.check_valid_input(word2)):
+        	self._check_valid_input(word1) and
+        	self._check_valid_input(word2)):
 
             if word1 in self.new_data:
 
@@ -69,7 +73,7 @@ class dictionary:
 
         return flag
 
-    def check_valid_input(self, input):
+    def _check_valid_input(self, input):
     	#Test if input is a valid word in terms of
     	#capitals, symbols, spaces and emptiness
         flag = False
@@ -79,19 +83,19 @@ class dictionary:
         
         return flag
 
-    def sort_dict(self):
+    def _sort_dict(self):
         #checks the words in the file and choices only valid characters
         self.dict_sorted =[]
         for word in self.dict_list:
-            if self.check_valid_input(word):
+            if self._check_valid_input(word):
                 self.dict_sorted.append(word)
         
     def return_dictionary(self):
         #returns array of valid words
-        self.sort_dict()
+        self._sort_dict()
         return self.dict_sorted
 
-class main:
+class game_logic:
 
     def __init__(self):
         self.OPTION_PATH = "Data.txt"
@@ -100,58 +104,63 @@ class main:
         self.option = {}
         self.arrange_options()
         self.dictionary = dictionary()
-        self.init_values()
-        self.tmp_start()
 
     def arrange_options(self):
+    	#Reads the options from the text file into a dictionary 
         for param in self.raw_option:
             self.split_option = param.split(":")
             self.option[self.split_option[0]] = self.split_option[1].strip()
 
-    def check_user_input(self, guess):
+    def _check_user_input(self, guess):
+        #Returns true if the user input is a single character
         flag = False
-        if (len(guess) == 1):
+        if (len(guess) == 1 and
+        	guess.isalpha() and
+        	guess.islower()):
             if self.guess_char[guess] == False:
-                self.check_word(guess)
                 self.guess_char[guess] = True
                 flag = True
         return flag
 
     def check_word(self, guess):
-        flag = False
-        if (guess in self.cur_word):
-            flag = True
-            new_word = list(self.mis_word)
-            for i, letter in enumerate(self.cur_word):
-                if (guess == letter):
-                    new_word[2*i] = letter
-            self.mis_word = "".join(new_word)
+        #Checks if the character is within the word returning a boolean
+        flag = 0
+        if self._check_user_input(guess):
+        	flag = 1
+	        if (guess in self.cur_word):
+	            flag = 2
+	            new_word = list(self.mys_word)
+	            for i, letter in enumerate(self.cur_word):
+	                if (guess == letter):
+	                    new_word[2*i] = letter
+	            self.mys_word = "".join(new_word)
         return flag
 
-
-    def sort_dict(self):
+    def _sort_dict(self):
         #Sort the dictionary to only contain words of certain length
         #depending on the options or difficulty
         for word in self.dictionary.return_dictionary():
             if (str(len(word)) == str(self.option["Word_length"])):
                 self.dict_statified.append(word)
 
-    def tmp_start(self):
-        self.init_values()
-        print (self.mis_word)
-        self.check_word('a')
-        print (self.mis_word)
+    def start(self):
+        self._init_values()
 
-    def init_values(self):
+    def _init_values(self):
         #initialise all variables for a new game
         self.dict_statified = []
-        self.sort_dict()
+        self._sort_dict()
         self.cur_word = random.choice(self.dict_statified)
-        self.mis_word = "_ " * len(self.cur_word)
-        print(self.cur_word)
+        self.mys_word = "_ " * (len(self.cur_word))
         self.guess_char = {}
         for i in range(26):
             self.guess_char[chr(97+i)] = False
+
+    def get_mystery_word(self):
+    	return self.mys_word
+
+    def is_win(self):
+    	return ('_' not in self.mys_word)
 
 
 
@@ -162,12 +171,12 @@ class temp_run_game:
 	
 	def __init__ (self):
 		self.dict_list = dictionary()
+		self.test_run_ascii_game()
 
 	def test_run_dict_edit(self):
 		self.inputs = []
 
 		while True:
-
 			self.inputs = input("Enter command then the word: ").split()
 
 			if len(self.inputs) >= 2:
@@ -194,5 +203,22 @@ class temp_run_game:
 			if self.inputs[0] == "close":
 				break
 
+	def test_run_ascii_game(self):
+		game = game_logic()
+		game.start()
+		while True:
+			print (game.get_mystery_word())
+			usr_input = input("Guess a character")
+			if (usr_input == "exit"):
+				break
+			input_check = game.check_word(usr_input)
+			if (input_check == 2):
+				print ("{} in word".format(usr_input))
+			elif (input_check == 1):
+				print ("{} is not in word".format(usr_input))
+			elif (input_check == 0):
+				print ("{} is not a valid character".format(usr_input))
+
+
 if __name__ == "__main__":
-    main()
+    temp_run_game()
