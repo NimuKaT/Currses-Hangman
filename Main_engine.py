@@ -1,6 +1,7 @@
 import unittest
 from enum import Enum
 import os.path
+import random
 
 class Dict_Param(Enum):
     add = 1
@@ -35,7 +36,7 @@ class dictionary:
 
     def edit_dict(self, param, word1, word2=False):
         #Edits the dictionary add, remove and change *may be remove
-        self.flag = False
+        flag = False
         self.new_data = self.dict_list
 
         if (param == Dict_Param.add and
@@ -44,7 +45,7 @@ class dictionary:
             if not word1 in self.new_data:
                 self.new_data.append(word1)
                 write_file(self.DICT_PATH, self.new_data)
-                self.flag = True
+                flag = True
 
         elif (param == Dict_Param.remove and
         	self.check_valid_input(word1)):
@@ -52,7 +53,7 @@ class dictionary:
             if word1 in self.new_data:
                 del self.new_data[self.new_data.index(word1)]
                 write_file(self.DICT_PATH, self.new_data)
-                self.flag = True
+                flag = True
         
         elif (param == Dict_Param.change and
         	self.check_valid_input(word1) and
@@ -63,75 +64,106 @@ class dictionary:
                 if not word2 in self.new_data:
                     self.new_data[self.new_data.index(word1)] = word2
                     write_file(self.DICT_PATH, self.new_data)
-                    self.flag = True
+                    flag = True
+        self.dict_list = self.new_data
 
-        return self.flag
+        return flag
 
     def check_valid_input(self, input):
     	#Test if input is a valid word in terms of
     	#capitals, symbols, spaces and emptiness
-        self.valid_flag = False
+        flag = False
         
-        if input.isalpha(): 
-            self.valid_flag = True
+        if (input.isalpha() and input.islower()): 
+            flag = True
         
-        return self.valid_flag
+        return flag
 
     def sort_dict(self):
-        pass
+        #checks the words in the file and choices only valid characters
+        self.dict_sorted =[]
+        for word in self.dict_list:
+            if self.check_valid_input(word):
+                self.dict_sorted.append(word)
+        
+    def return_dictionary(self):
+        #returns array of valid words
+        self.sort_dict()
+        return self.dict_sorted
 
 class main:
 
     def __init__(self):
-        pass
+        self.OPTION_PATH = "Data.txt"
+        self.option_file = read_file(self.OPTION_PATH)
+        self.raw_option = self.option_file.get_data()
+        self.option = {}
+        self.arrange_options()
+        self.dictionary = dictionary()
+        self.init_values()
+        self.tmp_start()
 
-    def check_user_input(self):
-        pass
-    
+    def arrange_options(self):
+        for param in self.raw_option:
+            self.split_option = param.split(":")
+            self.option[self.split_option[0]] = self.split_option[1].strip()
+
+    def check_user_input(self, guess):
+        flag = False
+        if (len(guess) == 1):
+            if self.guess_char[guess] == False:
+                self.check_word(guess)
+                self.guess_char[guess] = True
+                flag = True
+        return flag
+
+    def check_word(self, guess):
+        flag = False
+        if (guess in self.cur_word):
+            flag = True
+            new_word = list(self.mis_word)
+            for i, letter in enumerate(self.cur_word):
+                if (guess == letter):
+                    new_word[2*i] = letter
+            self.mis_word = "".join(new_word)
+        return flag
+
+
     def sort_dict(self):
-        pass
-
-    def select_ran_word(self):
-        pass
+        #Sort the dictionary to only contain words of certain length
+        #depending on the options or difficulty
+        for word in self.dictionary.return_dictionary():
+            if (str(len(word)) == str(self.option["Word_length"])):
+                self.dict_statified.append(word)
 
     def tmp_start(self):
-        pass
+        self.init_values()
+        print (self.mis_word)
+        self.check_word('a')
+        print (self.mis_word)
 
-    def check_word(self):
-        pass
+    def init_values(self):
+        #initialise all variables for a new game
+        self.dict_statified = []
+        self.sort_dict()
+        self.cur_word = random.choice(self.dict_statified)
+        self.mis_word = "_ " * len(self.cur_word)
+        print(self.cur_word)
+        self.guess_char = {}
+        for i in range(26):
+            self.guess_char[chr(97+i)] = False
 
-class Test_dictionary(unittest.TestCase):
-	#Tests the dictionary class
-	@classmethod
-	def setUpClass(cls):
-		cls.dictionary = dictionary()
 
-	def test_input_all_caps(self):
-		self.assertFalse(
-			self.dictionary.check_valid_input("LIFE"),
-			"All values are capitals.Expected: False")
 
-	def test_input_start_with_caps(self):
-		self.assertFalse(
-			self.dictionary.check_valid_input("Sacred"),
-			"First letter is capital.Expected: False")
 
-	def test_input_not_empty(self):
-		self.assertFalse(
-			self.dictionary.check_valid_input(""),
-			"No Values.Expected: False")
-		
-	def test_input_not_int(self):
-		self.assertFalse(
-			self.dictionary.check_valid_input("42"),
-			"All values are integers. Expected: False")
+
 
 class temp_run_game:
 	
 	def __init__ (self):
 		self.dict_list = dictionary()
 
-	def run(self):
+	def test_run_dict_edit(self):
 		self.inputs = []
 
 		while True:
@@ -152,7 +184,8 @@ class temp_run_game:
 					if (not self.dict_list.edit_dict(Dict_Param.remove, self.inputs[1])):
 						print ("removing word is invalid or not in the dictionary")
 
-				elif (self.inputs[0] == "change" and len(self.inputs) == 3 and
+				elif (self.inputs[0] == "change" and
+                 len(self.inputs) == 3 and
 					self.dict_list.check_valid_input(self.inputs[1]) and
 					self.dict_list.check_valid_input(self.inputs[2])):
 
@@ -161,8 +194,5 @@ class temp_run_game:
 			if self.inputs[0] == "close":
 				break
 
-
 if __name__ == "__main__":
-	unittest.main()
-
-	
+    main()

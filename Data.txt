@@ -1,2 +1,2 @@
-Word lenght: 6
-High score: 342
+Word_length: 6
+High_score: 342
