@@ -1,3 +1,8 @@
+"""
+    Created by: Takumi Iwasa
+    Date:       03/06/2016
+    
+"""
 import unittest
 from Main_engine import *
 class Test_dictionary(unittest.TestCase):
@@ -63,6 +68,9 @@ class Test_game_logic(unittest.TestCase):
             self.main._check_user_input(chr(97+i)),
             "{} is valid. Expected: True".format(chr(97+i)))
 
+    #tests specific words and the differentiation of valid input,
+    #whether the input is contained in the word and
+    #if the player has won or not
     def test_word_hello(self):
         self.main.start()
         self.main.cur_word = "hello"

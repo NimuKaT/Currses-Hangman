@@ -1,3 +1,8 @@
+"""
+	Created by: Takumi Iwasa
+	Date: 		17/05/2016
+	
+"""
 import unittest
 from enum import Enum
 import os.path
