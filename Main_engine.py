@@ -15,7 +15,7 @@ class Dict_Param(Enum):
 
 class read_file:
     def __init__(self, path):
-		#Save data from file in array and close file
+		#Save data from file at path into array and close file
         self.data = []
         with open(path, 'r') as file:
             for line in file:
@@ -27,14 +27,14 @@ class read_file:
 
 class write_file:
     def __init__(self, path, new_data):
-        #Replace data in file
+        #Replace data in file with new_data into path
         with open(path, 'w') as file:
             file.write("\n".join(new_data)) 
 
 class dictionary:
     
     def __init__(self):
-    	#Loads dictionary file into memory
+    	#Loads dictionary file into an array
         self.DICT_PATH = "Dictionary.txt"
         self.dict_in = read_file(self.DICT_PATH)
         self.dict_list = self.dict_in.get_data()
@@ -111,13 +111,14 @@ class game_logic:
         self.dictionary = dictionary()
 
     def arrange_options(self):
-    	#Reads the options from the text file into a dictionary 
+    	#Reads the options from the text file into the dictionary option
         for param in self.raw_option:
             self.split_option = param.split(":")
             self.option[self.split_option[0]] = self.split_option[1].strip()
 
     def _check_user_input(self, guess):
         #Returns true if the user input is a single character
+        #If not returns false
         flag = False
         if (len(guess) == 1 and
         	guess.isalpha() and
@@ -129,6 +130,9 @@ class game_logic:
 
     def check_word(self, guess):
         #Checks if the character is within the word returning a boolean
+        #Returns 0 for invalid input
+        #Returns 1 for input not in word
+        #Returns 2 for input in word
         flag = 0
         if self._check_user_input(guess):
         	flag = 1
@@ -143,16 +147,20 @@ class game_logic:
 
     def _sort_dict(self):
         #Sort the dictionary to only contain words of certain length
-        #depending on the options or difficulty
+        #Depending on the options or difficulty
         for word in self.dictionary.return_dictionary():
             if (str(len(word)) == str(self.option["Word_length"])):
                 self.dict_statified.append(word)
 
     def start(self):
+        #Temporary game initialise function
         self._init_values()
 
     def _init_values(self):
-        #initialise all variables for a new game
+        #Initialise all variables for a new game
+        #Re-sorts the dictionary using current value in option
+        #Selects a random word from dictionary and make an empty 
+        #Dictionary of each character in the alphabet
         self.dict_statified = []
         self._sort_dict()
         self.cur_word = random.choice(self.dict_statified)
@@ -162,9 +170,12 @@ class game_logic:
             self.guess_char[chr(97+i)] = False
 
     def get_mystery_word(self):
-    	return self.mys_word
+    	#Return mystery word as string
+        return self.mys_word
 
     def is_win(self):
+        #Returns true if no _ are pressent in the mystery word and 
+        #Therefore win
     	return ('_' not in self.mys_word)
 
 
