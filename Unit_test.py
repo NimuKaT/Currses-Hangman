@@ -135,27 +135,42 @@ class Test_game_logic(unittest.TestCase):
 
     #template for testing specific words
     """def test_word_(self):
+        #initiates variables
         self.main.start()
+        
+        #Change word manually
         self.main.cur_word = ""
+       
+        #Updates mystery word
         self.main.mys_word = "_ " * (len(self.main.cur_word))
+       
+        #Assert test_chr expecting an invalid input return
         test_chr = ''
         self.assertEqual(
             self.main.check_word(test_chr),
             0,
             "{0} is not a valid input. Expected: 0".format(test_chr))
+
+        #Assert test_chr expecting character to not be in word
         test_chr = ''
         self.assertEqual(
             self.main.check_word(test_chr),
             1,
             "{0} is not in {1}. Expected: 1".format(test_chr, self.main.cur_word))
+       
+        #Assert test_chr expecting character to be in word
         test_chr = ''
         self.assertEqual(
             self.main.check_word(test_chr),
             2,
             "{0} is in {1}. Expected: 2".format(test_chr, self.main.cur_word))    
+        
+        #Test whether player has not won yet
         self.assertFalse(
             self.main.is_win(),
             "Player should not have won. Expected: False")
+        
+        #Test if player has won
         self.assertTrue(
             self.main.is_win(),
             "Player should have won. Expected: True")

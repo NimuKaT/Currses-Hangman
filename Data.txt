@@ -1,2 +1,3 @@
 Word_length: 6
+Max_guess: 8
 High_score: 342
