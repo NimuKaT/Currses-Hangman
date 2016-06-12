@@ -11,7 +11,7 @@ import Main_engine
 
 class ui_handler():
     def __init__(self, master=None):
-        tk.Wm.title(master, 'bad')
+        tk.Wm.title(master, 'Hangman')
         self.wave_obj = sa.WaveObject.from_wave_file('simpleaudio/test_audio/c.wav')
         self.audios = None
         self.game = Main_engine.game_logic()
@@ -34,11 +34,11 @@ class ui_handler():
         play_button.pack()
 
         option_button = tk.Button(self.frames['main'],text='Options',
-            relief='flat')
+            relief='flat', state='disabled')
         option_button.pack()
 
         instruction_button = tk.Button(self.frames['main'],text='Instructions',
-            relief='flat')
+            relief='flat', state='disabled')
         instruction_button.pack()
 
         exit_button = tk.Button(self.frames['main'],text='Exit',
@@ -92,7 +92,7 @@ class ui_handler():
         error_label = tk.Label(self.frames['game'], textvariable=self.error, fg='red')
         error_label.pack()
 
-        """guessed_word_labelframe = tk.LabelFrame(self.frames['game'], relief='flat')
+        guessed_word_labelframe = tk.LabelFrame(self.frames['game'], relief='flat')
         guessed_word_labels = {}
         for i in range(26):
             if i > 12:
@@ -107,10 +107,10 @@ class ui_handler():
                 status = 'disabled'
             guessed_word_labels[chr(97+i)] = tk.Label(guessed_word_labelframe, text=chr(97+i), state=status)
             guessed_word_labels[chr(97+i)].grid(column=col,row=row)
-        guessed_word_labelframe.pack()"""
+        guessed_word_labelframe.pack()
 
         back_button = tk.Button(self.frames['game'],text='Back',
-            relief='flat')
+            relief='flat', command=lambda: (self.frames['game'].pack_forget(), self._main_menu()))
         back_button.pack()
 
         self.frames['game'].pack()
@@ -161,7 +161,7 @@ class ui_handler():
 root = tk.Tk()
 app = ui_handler(master=root)
 while True:
-    #app.audio()
+    #app.music_loop()
     app.check_game()
     root.update_idletasks()
     root.update()
