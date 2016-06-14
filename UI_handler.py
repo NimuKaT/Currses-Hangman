@@ -43,7 +43,7 @@ class ui_handler():
 
         exit_button = tk.Button(self.frames['main'],text='Exit',
             relief='flat',
-            command=root.destroy)
+            command=exit)
         exit_button.pack()
 
         self.frames['main'].pack()
@@ -157,10 +157,14 @@ class ui_handler():
         back_to_menu_button.pack(side="top")
 
         frame.pack()
-
+global exit
+def quit():
+    exit = True
+exit = False
 root = tk.Tk()
+root.protocol('WM_DELETE_WINDOW', quit)
 app = ui_handler(master=root)
-while True:
+while not exit:
     #app.music_loop()
     app.check_game()
     root.update_idletasks()
