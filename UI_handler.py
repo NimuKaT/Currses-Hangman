@@ -11,6 +11,7 @@ import Main_engine
 
 class ui_handler():
     def __init__(self, master=None):
+        global exit
         tk.Wm.title(master, 'Hangman')
         self.wave_obj = sa.WaveObject.from_wave_file('Assets/audio/nyan.wav')
         self.audios = None
@@ -92,8 +93,8 @@ class ui_handler():
         error_label = tk.Label(self.frames['game'], textvariable=self.error, fg='red')
         error_label.pack()
 
-        guessed_word_labelframe = tk.LabelFrame(self.frames['game'], relief='flat')
-        guessed_word_labels = {}
+        self.guessed_word_labelframe = tk.LabelFrame(self.frames['game'], relief='flat')
+        self.guessed_word_labels = {}
         for i in range(26):
             if i > 12:
                 row = 1
@@ -105,9 +106,9 @@ class ui_handler():
             status = 'normal'
             if (self.game.get_guessed_char()[chr(97+i)]):
                 status = 'disabled'
-            guessed_word_labels[chr(97+i)] = tk.Label(guessed_word_labelframe, text=chr(97+i), state=status)
-            guessed_word_labels[chr(97+i)].grid(column=col,row=row)
-        guessed_word_labelframe.pack()
+            self.guessed_word_labels[chr(97+i)] = tk.Label(self.guessed_word_labelframe, text=chr(97+i), state=status)
+            self.guessed_word_labels[chr(97+i)].grid(column=col,row=row)
+        self.guessed_word_labelframe.pack()
 
         back_button = tk.Button(self.frames['game'],text='Back',
             relief='flat', command=lambda: (self.frames['game'].pack_forget(), self._main_menu()))
@@ -122,9 +123,27 @@ class ui_handler():
             self.error.set("{} is already guessed".format(event.char))
         elif (self.game.check_word(event.char)):
             self.mystery_word.set(self.game.get_mystery_word())
+            self.guessed_word_labels[event.char] = tk.Label(self.guessed_word_labelframe, text=event.char, fg='green')
+            char_num = ord(event.char) - 97
+            if char_num > 12:
+                row = 1
+                col = char_num-13
+            else:
+                row = 0
+                col = char_num
+            self.guessed_word_labels[event.char].grid(column=col, row=row)
         else:
-           self.error.set("{} is not in word".format(event.char))
-        time.sleep(0.01)
+            self.error.set("{} is not in word".format(event.char))
+            self.guessed_word_labels[event.char] = tk.Label(self.guessed_word_labelframe, text=event.char, fg='red')
+            char_num = ord(event.char) - 97
+            if char_num > 12:
+                row = 1
+                col = char_num-13
+            else:
+                row = 0
+                col = char_num
+            self.guessed_word_labels[event.char].grid(column=col, row=row)
+        time.sleep(0.1)
             
     def check_game(self):
         
@@ -159,17 +178,17 @@ class ui_handler():
 
         frame.pack()
 
+    def _update_alpha_list(self):
+        pass
+
 global exit
 def quit():
     exit = True
 exit = False
 root = tk.Tk()
 app = ui_handler(master=root)
-root.protocol('WM_DELETE_WINDOW',lambda:(quit(), root.destroy()))
+root.protocol('WM_DELETE_WINDOW', quit())
 while not exit:
-    if exit:
-        root.destroy()
-        break
     app.music_loop()
     app.check_game()
     root.update_idletasks()

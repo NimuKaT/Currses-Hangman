@@ -192,7 +192,7 @@ class game_logic:
 
     def is_lose(self):
         flag = False
-        if (self.guess_counter == int(self.option['Max_guess'])):
+        if (self.guess_counter >= int(self.option['Max_guess'])):
             if ('_' in self.mys_word):
                 flag = True
         return flag
