@@ -34,7 +34,7 @@ class ui_handler():
         self.wave_obj = {}
         self.wave_obj[AUDIO.MENU_MUSIC] = sa.WaveObject.from_wave_file('Assets/audio/nyan.wav')
         self.wave_obj[AUDIO.GAME_MUSIC] = sa.WaveObject.from_wave_file('simpleaudio/test_audio/notes_2_16_44.wav')
-        self.wave_obj[AUDIO.DEFAUL_BUTTON_SE] = sa.WaveObject.from_wave_file('simpleaudio/test_audio/c.wav')
+        self.wave_obj[AUDIO.DEFAUL_BUTTON_SE] = sa.WaveObject.from_wave_file('Assets/audio/Blop_Mark_DiAngelo_79054334.wav')
         self.wave_obj[AUDIO.GAME_WIN_SE] = sa.WaveObject.from_wave_file('simpleaudio/test_audio/e.wav')
         self.wave_obj[AUDIO.GAME_LOSE_SE] = sa.WaveObject.from_wave_file('simpleaudio/test_audio/g.wav')
 
@@ -46,6 +46,10 @@ class ui_handler():
 
         self.Images = {}
         self.Images['Play_button'] = tk.PhotoImage(file='Assets/Image/Play_button.pbm')
+        self.Images['Sound_effects_play'] = tk.PhotoImage(file='Assets/Image/Speaker_icon.pbm')
+        self.Images['Sound_effects_mute'] = tk.PhotoImage(file='Assets/Image/Mute_icon.pbm')
+        self.Images['music_play'] = tk.PhotoImage(file='Assets/Image/Linecons_quaver.pbm')
+        self.Images['music_mute'] = tk.PhotoImage(file='Assets/Image/Linecons_quaver_mute.pbm')
 
         self.game = Main_engine.game_logic()
         self.is_play_music_loop = self.game.return_options('Music')
@@ -55,11 +59,23 @@ class ui_handler():
         self.master = master
         self.ran = False
         self.frames =  {}
-        toggle_music_loop_button = tk.Button(master, text='music', command=self.toggle_music)
-        toggle_music_loop_button.pack(side='left', anchor='nw')
-        toggle_sound_effect_button = tk.Button(master, text='SE', command=self.toggle_sound_effect)
-        toggle_sound_effect_button.pack(side='left', anchor='nw')
+        self.toggle_music_loop_button = tk.Button(master, text='music', command=self.toggle_music, relief='groove')
+        self.toggle_sound_effect_button = tk.Button(master, text='SE', command=self.toggle_sound_effect, relief='solid')
+        self.audio_control()
         self._main_menu()
+
+    def audio_control(self):
+        if self.is_play_music_loop == 'True':
+            self.toggle_music_loop_button['image'] = self.Images['music_play']
+        else:
+            self.toggle_music_loop_button['image'] = self.Images['music_mute']
+        self.toggle_music_loop_button.pack(side='left', anchor='nw')
+
+        if self.is_play_sound_effect == 'True':
+            self.toggle_sound_effect_button['image'] = self.Images['Sound_effects_play']
+        else:
+            self.toggle_sound_effect_button['image'] = self.Images['Sound_effects_mute']
+        self.toggle_sound_effect_button.pack(side='left', anchor='nw')
 
     def _main_menu(self):
         self.frames['main'] = tk.Frame()
@@ -227,6 +243,7 @@ class ui_handler():
         else:
             self.is_play_music_loop = 'True'
         self.game.change_options('Music', self.is_play_music_loop)
+        self.audio_control()
 
     def play_sound_effect(self, key):
         if (self.is_play_sound_effect == 'True'):
@@ -243,6 +260,7 @@ class ui_handler():
         else:
             self.is_play_sound_effect = 'True'
         self.game.change_options('Sound_effects', self.is_play_sound_effect)
+        self.audio_control()
 
         
 
