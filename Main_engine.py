@@ -116,6 +116,13 @@ class game_logic:
             self.option[self.split_option[0]] = self.split_option[1].strip()
 
     def check_user_input(self, guess):
+        flag = False
+        if (len(guess) == 1 and
+            guess.isalpha()):
+            flag = True
+        return flag
+
+    def _check_user_input(self, guess):
         #Returns true if the user input is a single character
         #If not returns false
         flag = False
@@ -128,7 +135,7 @@ class game_logic:
     def is_guessed(self, guess):
         #Returns true if character has been guessed
         flag = False
-        if self.check_user_input(guess):
+        if self._check_user_input(guess):
             if self.guess_char[guess]:
                 flag = True
         return flag
@@ -138,18 +145,18 @@ class game_logic:
         #Returns true if guess is contained in word
         #Returns false if not
         flag = False
-        if (self.check_user_input(guess)):
-            if (not self.is_guessed(guess)):
-                self.guess_char[guess] = True
-                if (guess in self.cur_word):
-                    flag = True
-                    new_word = list(self.mys_word)
-                    for i, letter in enumerate(self.cur_word):
-                        if (guess == letter):
-                            new_word[2*i] = letter
-                        self.mys_word = "".join(new_word)
-                else:
-                    self.guess_counter += 1
+
+        if (not self.is_guessed(guess)):
+            self.guess_char[guess] = True
+            if (guess in self.cur_word):
+                flag = True
+                new_word = list(self.mys_word)
+                for i, letter in enumerate(self.cur_word):
+                    if (guess == letter):
+                        new_word[2*i] = letter
+                    self.mys_word = "".join(new_word)
+            else:
+                self.guess_counter += 1
         return flag
 
     def _sort_dict(self):
@@ -207,6 +214,26 @@ class game_logic:
         #Returns the dictionary containing whether a character has been guessed
         return self.guess_char
 
+    def return_options(self, key):
+        return_value = False
+        if (key in self.option):
+            return_value = self.option[key]
+        return return_value
+
+    def change_options(self, key, value):
+        flag = False
+        if key in self.option:
+            self.option[key] = value
+            self.update_options()
+            flag = True
+        return flag
+
+    def update_options(self):
+        data = []
+        for key, value in self.option.items():
+            data.append('{}: {}'.format(key, value))
+        write_file(self.OPTION_PATH, data)
+
 #Class for testing classes in a command-line interface
 class temp_run_game:
 	
@@ -247,6 +274,7 @@ class temp_run_game:
     def test_run_ascii_game(self):
         game = game_logic()
         game.start()
+        game.update_options()
         while True:
 			
             if (game.is_win()):
