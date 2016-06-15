@@ -8,12 +8,35 @@ import tkinter as tk
 import simpleaudio as sa
 import time
 import Main_engine
+from enum import Enum
+
+class AUDIO(Enum):
+
+    MENU_MUSIC = 0,
+    GAME_MUSIC = 1,
+
+    DEFAUL_BUTTON_SE = 2,
+    GAME_WIN_SE = 3,
+    GAME_LOSE_SE = 4
+    DEFAULT = 5
 
 class ui_handler():
     def __init__(self, master=None):
+        
         tk.Wm.title(master, 'Hangman')
-        self.wave_obj = sa.WaveObject.from_wave_file('Assets/audio/nyan.wav')
-        self.audios = None
+
+        self.wave_obj = {}
+        self.wave_obj[AUDIO.MENU_MUSIC] = sa.WaveObject.from_wave_file('Assets/audio/nyan.wav')
+        self.wave_obj[AUDIO.GAME_MUSIC] = sa.WaveObject.from_wave_file('simpleaudio/test_audio/notes_2_16_44.wav')
+        self.wave_obj[AUDIO.DEFAUL_BUTTON_SE] = sa.WaveObject.from_wave_file('simpleaudio/test_audio/c.wav')
+        self.wave_obj[AUDIO.GAME_WIN_SE] = sa.WaveObject.from_wave_file('simpleaudio/test_audio/e.wav')
+        self.wave_obj[AUDIO.GAME_LOSE_SE] = sa.WaveObject.from_wave_file('simpleaudio/test_audio/g.wav')
+
+        self.play_obj = {}
+        self.play_obj[AUDIO.MENU_MUSIC] = None
+        self.play_obj[AUDIO.GAME_MUSIC] = None
+        self.current_audio = 0
+
         self.game = Main_engine.game_logic()
         self.is_game_running = False
         self.current_frame = None
@@ -25,9 +48,11 @@ class ui_handler():
     def _main_menu(self):
         self.frames['main'] = tk.Frame()
 
+        self.current_audio = AUDIO.MENU_MUSIC
+
         play_button = tk.Button(self.frames['main'],text='Play',
             command=lambda: (self.frames['main'].pack_forget(),
-            self.wave_obj.play(),
+            self.wave_obj[AUDIO.DEFAUL_BUTTON_SE].play(),
             self._game_menu()),
             relief='flat')
 
@@ -53,30 +78,15 @@ class ui_handler():
         frame = tk.Frame()
         frame.pack()
 
-    def _test_menu(self):
-        self.frames['main'] = tk.Frame()
-
-        self.label1_str = tk.StringVar()
-        self.label1_str.set("Test label 1")
-
-        label1 = tk.Label(frame,
-            textvariable=self.label1_str)
-        label1.bind("<Button-1>", self._test_func)
-        label1.pack()
-
-        frame.pack()
-
-    def _test_func(self, event):
-        self.label1_str.set("clicked at x:{0} y:{1}".format(event.x, event.y))
-
     def music_loop(self):
-        if isinstance(self.audios, sa.PlayObject):
-            if (not self.audios.is_playing()):
-                self.audios = self.wave_obj.play()
+        if isinstance(self.play_obj[self.current_audio], sa.PlayObject):
+            if (not self.play_obj[self.current_audio].is_playing()):
+                self.play_obj[self.current_audio] = self.wave_obj[self.current_audio].play()
         else:
-            self.audios = self.wave_obj.play()
+            self.play_obj[self.current_audio] = self.wave_obj[self.current_audio].play()
             
     def _game_menu(self):
+        self.current_audio = AUDIO.MENU_MUSIC
         self.current_frame = "Game"
         self.ran = False
         self.frames['game'] = tk.Frame(height=100, width=100)
@@ -125,16 +135,13 @@ class ui_handler():
             self.mystery_word.set(self.game.get_mystery_word())
         else:
            self.error.set("{} is not in word".format(event.char))
-        time.sleep(0.01)
-            
-    def check_game(self):
-        
         if (self.current_frame == 'Game' and not self.ran):
             if (self.game.is_win() or self.game.is_lose()):
                 self.frames['game'].pack_forget()
                 self.result_menu(self.game.is_win())
                 self.ran = True
-
+        time.sleep(0.01)
+                    
     def result_menu(self, win):
         frame = tk.Frame()
         result_str = tk.StringVar()
@@ -160,21 +167,30 @@ class ui_handler():
 
         frame.pack()
 
+
+        
+
+
+
+#Initializes a global variable and function to exit the main loop of tkinter
 global exit
 exit = False
 def quit():
     global exit
     exit = True
+
+#Assigns root as the Top-Level window and binds the exit protocol to the global
+#exit function to prevent tkinter from sending errors
 root = tk.Tk()
 root.protocol('WM_DELETE_WINDOW', quit)
 
+#Initialize the application while passing the root window so the application can 
+#assign images into the window
 app = ui_handler(master=root)
 
+#Main loop of tkinter with the update calls for the application
 while not exit:
     app.music_loop()
-
-
-    app.check_game()
     root.update_idletasks()
     root.update()
     time.sleep(0.01)
