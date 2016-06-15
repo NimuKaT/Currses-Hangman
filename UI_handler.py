@@ -12,7 +12,7 @@ import Main_engine
 class ui_handler():
     def __init__(self, master=None):
         tk.Wm.title(master, 'Hangman')
-        self.wave_obj = sa.WaveObject.from_wave_file('simpleaudio/test_audio/c.wav')
+        self.wave_obj = sa.WaveObject.from_wave_file('Assets/audio/nyan.wav')
         self.audios = None
         self.game = Main_engine.game_logic()
         self.is_game_running = False
@@ -43,7 +43,7 @@ class ui_handler():
 
         exit_button = tk.Button(self.frames['main'],text='Exit',
             relief='flat',
-            command=root.destroy)
+            command=lambda:(quit))
         exit_button.pack()
 
         self.frames['main'].pack()
@@ -124,6 +124,7 @@ class ui_handler():
             self.mystery_word.set(self.game.get_mystery_word())
         else:
            self.error.set("{} is not in word".format(event.char))
+        time.sleep(0.01)
             
     def check_game(self):
         
@@ -158,11 +159,20 @@ class ui_handler():
 
         frame.pack()
 
+global exit
+def quit():
+    exit = True
+exit = False
 root = tk.Tk()
 app = ui_handler(master=root)
-while True:
-    #app.music_loop()
+root.protocol('WM_DELETE_WINDOW',lambda:(quit(), root.destroy()))
+while not exit:
+    if exit:
+        root.destroy()
+        break
+    app.music_loop()
     app.check_game()
     root.update_idletasks()
     root.update()
     time.sleep(0.01)
+root.destroy()
