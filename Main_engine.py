@@ -15,14 +15,14 @@ class Dict_Param(Enum):
 
 class read_file:
     def __init__(self, path):
-        #Save data from file at path into an array and close file
+        #Save data from file at path into an array and closes file
         self.data = []
         with open(path, 'r') as file:
             for line in file:
                 self.data.append(line.strip())	
 
     def get_data(self):
-        #Return the data of file as an array
+        #Return the data of the file as an array of strings
         return self.data
 
 class write_file:
@@ -40,7 +40,7 @@ class dictionary:
 
     def edit_dict(self, param, word1, word2=False):
         #Edits the dictionary add, remove and change *may be remove
-        #Returns false if the input is invalid
+        #Returns false if the input are invalid
         flag = False
         self.new_data = self.dict_list
 
@@ -62,7 +62,7 @@ class dictionary:
                 write_file(self.DICT_PATH, self.new_data)
                 flag = True
         
-        #Edits the word by removing the old and adding the new if valid
+        #Edits the word by removing the old word and adding the new word if valid
         elif (param == Dict_Param.change and
             self._check_valid_input(word1) and
             self._check_valid_input(word2)):
@@ -79,7 +79,7 @@ class dictionary:
 
     def _check_valid_input(self, input):
         #Test if input is a valid word in terms of
-        #capitals, symbols, spaces and emptiness
+        #capitals, symbols, spaces and if any value is present
         flag = False
         
         if (input.isalpha() and input.islower()): 
@@ -88,14 +88,14 @@ class dictionary:
         return flag
 
     def _sort_dict(self):
-        #checks the words in the file and choices only valid characters
+        #Checks the words in the file and choices only valid characters
         self.dict_sorted =[]
         for word in self.dict_list:
             if self._check_valid_input(word):
                 self.dict_sorted.append(word)
         
     def return_dictionary(self):
-        #returns array of valid words
+        #Sorts the dictionary and then returns as an array of strings
         self._sort_dict()
         return self.dict_sorted
 
@@ -160,19 +160,25 @@ class game_logic:
                 self.dict_statified.append(word)
 
     def start(self):
-        #Temporary game initialise function
+        #Temporary game initialize function
         self._init_values()
 
     def _init_values(self):
-        #Initialise all variables for a new game
-        #Re-sorts the dictionary using current value in option
-        #Selects a random word from dictionary and make an empty 
+        #Initialize all variables for a new game
         #Dictionary of each character in the alphabet
         self.guess_counter = 0
+        
+        #Re-sorts the dictionary using current value in option
         self.dict_statified = []
         self._sort_dict()
+        
+        #Selects a random word from dictionary and make a string with '_' followed
+        #with a space
         self.cur_word = random.choice(self.dict_statified)
         self.mys_word = "_ " * (len(self.cur_word))
+        
+        #Creates a dictionary that contains all the lower case alphabet which
+        #indicates whether a letter has been guessed
         self.guess_char = {}
         for i in range(26):
             self.guess_char[chr(97+i)] = False
@@ -182,8 +188,7 @@ class game_logic:
         return self.mys_word
 
     def is_win(self):
-        #Returns true if no _ are pressent in the mystery word and 
-        #Therefore win
+        #Returns True if no _ are present in the mystery word
         flag = False
         if self.guess_counter <= int(self.option['Max_guess']):
             if ('_' not in self.mys_word):
@@ -191,6 +196,7 @@ class game_logic:
         return flag
 
     def is_lose(self):
+        #Returns True if a '_' is present and guess_counter is greater than Max_guess
         flag = False
         if (self.guess_counter >= int(self.option['Max_guess'])):
             if ('_' in self.mys_word):
@@ -198,11 +204,10 @@ class game_logic:
         return flag
 
     def get_guessed_char(self):
+        #Returns the dictionary containing whether a character has been guessed
         return self.guess_char
 
-
-
-
+#Class for testing classes in a command-line interface
 class temp_run_game:
 	
     def __init__ (self):
