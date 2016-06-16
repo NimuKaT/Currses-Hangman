@@ -234,6 +234,10 @@ class game_logic:
             data.append('{}: {}'.format(key, value))
         write_file(self.OPTION_PATH, data)
 
+    def return_count(self):
+        return self.guess_counter
+
+
 #Class for testing classes in a command-line interface
 class temp_run_game:
 	
