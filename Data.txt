@@ -1,6 +1,6 @@
-Dictionary: Custom
 Max_guess: 8
-Word_length: 15
 High_score: 342
+Dictionary: Default
+Word_length: 12
 Music: True
 Sound_effects: True

@@ -33,9 +33,9 @@ class write_file:
 
 class dictionary:
     
-    def __init__(self):
+    def __init__(self, path):
         #Loads dictionary file into an array
-        self.DICT_PATH = "Dictionary.txt"
+        self.DICT_PATH = path
         self.dict_list = read_file(self.DICT_PATH).get_data()
 
     def edit_dict(self, param, word1, word2=False):
@@ -107,7 +107,11 @@ class game_logic:
         self.raw_option = self.option_file.get_data()
         self.option = {}
         self.arrange_options()
-        self.dictionary = dictionary()
+        if self.option['Dictionary'] == 'Custom':
+            self.DICT_PATH = "Custom_dictionary.txt"
+        else:
+            self.DICT_PATH = "Dictionary.txt"
+        self.dictionary = dictionary(self.DICT_PATH)
 
     def arrange_options(self):
         #Reads the options from the text file into the dictionary option
@@ -115,14 +119,8 @@ class game_logic:
             self.split_option = param.split(":")
             self.option[self.split_option[0]] = self.split_option[1].strip()
 
-    def check_user_input(self, guess):
-        flag = False
-        if (len(guess) == 1 and
-            guess.isalpha()):
-            flag = True
-        return flag
 
-    def _check_user_input(self, guess):
+    def check_user_input(self, guess):
         #Returns true if the user input is a single character
         #If not returns false
         flag = False
@@ -135,7 +133,7 @@ class game_logic:
     def is_guessed(self, guess):
         #Returns true if character has been guessed
         flag = False
-        if self._check_user_input(guess):
+        if self.check_user_input(guess):
             if self.guess_char[guess]:
                 flag = True
         return flag
@@ -174,6 +172,13 @@ class game_logic:
         #Initialize all variables for a new game
         #Dictionary of each character in the alphabet
         self.guess_counter = 0
+
+        #Chooses which dictionary to use
+        if self.option['Dictionary'] == 'Custom':
+            self.DICT_PATH = "Custom_dictionary.txt"
+        else:
+            self.DICT_PATH = "Dictionary.txt"
+        self.dictionary = dictionary(self.DICT_PATH)
         
         #Re-sorts the dictionary using current value in option
         self.dict_statified = []
@@ -215,26 +220,33 @@ class game_logic:
         return self.guess_char
 
     def return_options(self, key):
+        #Takes a key and return the value which is contained in 'options'
+        #if it does not exist returns false
         return_value = False
         if (key in self.option):
             return_value = self.option[key]
         return return_value
 
     def change_options(self, key, value):
+        #Takes a key and a value which is contained in 'options' and changes the 
+        #value. If it does not exist returns false
         flag = False
         if key in self.option:
             self.option[key] = value
+            #Places the new options into file
             self.update_options()
             flag = True
         return flag
 
     def update_options(self):
+        #Writes the new options into file
         data = []
         for key, value in self.option.items():
             data.append('{}: {}'.format(key, value))
         write_file(self.OPTION_PATH, data)
 
     def return_count(self):
+        #Returns the number of guesses
         return self.guess_counter
 
 
@@ -242,7 +254,7 @@ class game_logic:
 class temp_run_game:
 	
     def __init__ (self):
-        self.dict_list = dictionary()
+        self.dict_list = dictionary("Custom_dictionary.txt")
         self.test_run_ascii_game()
 
     def test_run_dict_edit(self):
