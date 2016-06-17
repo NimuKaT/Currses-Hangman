@@ -1,3 +1,3 @@
 echo off
-python Launcher.py
+python UI_handler.py
 pause
