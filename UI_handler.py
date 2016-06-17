@@ -96,6 +96,20 @@ class ui_handler():
 
         self.current_audio = AUDIO.MENU_MUSIC
 
+        word_length_opt = [
+            '6',
+            '7',
+            '8',
+            '9',
+            '10'
+        ]
+
+        current_length = tk.StringVar(self.frames['main'])
+        current_length.set(str(self.game.return_options('Word_length')))
+        word_lenght = tk.OptionMenu(self.frames['main'], current_length, *word_length_opt)
+        word_lenght.pack()
+
+
         play_button = tk.Button(self.frames['main'],text='Play',
             command=lambda: (self.frames['main'].pack_forget(),
             self.play_sound_effect(AUDIO.DEFAUL_BUTTON_SE),
@@ -103,7 +117,6 @@ class ui_handler():
             relief='flat',
             image=self.Images['Play_button'])
         play_button.image = self.Images['Play_button']
-
         play_button.pack()
 
         option_button = tk.Button(self.frames['main'],
