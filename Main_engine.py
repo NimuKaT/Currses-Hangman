@@ -38,7 +38,7 @@ class dictionary:
         self.DICT_PATH = path
         self.dict_list = read_file(self.DICT_PATH).get_data()
 
-    def edit_dict(self, param, word1, word2=False):
+    """def edit_dict(self, param, word1, word2=False):
         #Edits the dictionary add, remove and change *may be remove
         #Returns false if the input are invalid
         flag = False
@@ -75,7 +75,7 @@ class dictionary:
                     flag = True
         self.dict_list = self.new_data
 
-        return flag
+        return flag"""
 
     def _check_valid_input(self, input):
         #Test if input is a valid word in terms of
@@ -254,10 +254,10 @@ class game_logic:
 class temp_run_game:
 	
     def __init__ (self):
-        self.dict_list = dictionary("Custom_dictionary.txt")
+        """self.dict_list = dictionary("Custom_dictionary.txt")"""
         self.test_run_ascii_game()
 
-    def test_run_dict_edit(self):
+    """def test_run_dict_edit(self):
         self.inputs = []
 
         while True:
@@ -285,7 +285,7 @@ class temp_run_game:
                     self.dict_list.edit_dict(Dict_Param.change, self.inputs[1], self.inputs[2])
 
                 if self.inputs[0] == "close":
-                    break
+                    break"""
 
     def test_run_ascii_game(self):
         game = game_logic()
