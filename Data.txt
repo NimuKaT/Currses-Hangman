@@ -1,5 +1,6 @@
-High_score: 342
-Word_length: 15
+Dictionary: Custom
 Max_guess: 8
-Music: False
+Word_length: 15
+High_score: 342
+Music: True
 Sound_effects: True
