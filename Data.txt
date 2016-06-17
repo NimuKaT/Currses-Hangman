@@ -1,5 +1,5 @@
-Word_length: 6
+High_score: 342
+Word_length: 15
+Max_guess: 8
 Music: False
 Sound_effects: True
-Max_guess: 8
-High_score: 342

@@ -54,6 +54,7 @@ class ui_handler():
         self.audio_control()
         self._main_menu()
 
+
     def load_audio(self):
         self.wave_obj = {}
         self.wave_obj[AUDIO.MENU_MUSIC] = sa.WaveObject.from_wave_file('Assets/audio/nyan.wav')
@@ -61,90 +62,6 @@ class ui_handler():
         self.wave_obj[AUDIO.DEFAUL_BUTTON_SE] = sa.WaveObject.from_wave_file('Assets/audio/Blop_Mark_DiAngelo_79054334.wav')
         self.wave_obj[AUDIO.GAME_WIN_SE] = sa.WaveObject.from_wave_file('simpleaudio/test_audio/e.wav')
         self.wave_obj[AUDIO.GAME_LOSE_SE] = sa.WaveObject.from_wave_file('simpleaudio/test_audio/g.wav')
-
-
-    def load_images(self):
-        self.Images = {}
-        self.Images['Play_button'] = tk.PhotoImage(file='Assets/Image/Play_button.pbm')
-        self.Images['Sound_effects_play'] = tk.PhotoImage(file='Assets/Image/Speaker_icon.pbm')
-        self.Images['Sound_effects_mute'] = tk.PhotoImage(file='Assets/Image/Mute_icon.pbm')
-        self.Images['music_play'] = tk.PhotoImage(file='Assets/Image/Linecons_quaver.pbm')
-        self.Images['music_mute'] = tk.PhotoImage(file='Assets/Image/Linecons_quaver_mute.pbm')
-        for i in range(1, 9):
-            path = 'Hangman_{}'.format(i)
-            self.Images[path] = tk.PhotoImage(file='Assets/Image/{}.pbm'.format(path))
-            
-
-
-    def audio_control(self):
-        #Updates the image for the music and SE button according to their state
-        #Both are updated to keep them in order
-        if self.is_play_music_loop == 'True':
-            self.toggle_music_loop_button['image'] = self.Images['music_play']
-        else:
-            self.toggle_music_loop_button['image'] = self.Images['music_mute']
-        self.toggle_music_loop_button.pack(side='left', anchor='nw')
-
-        if self.is_play_sound_effect == 'True':
-            self.toggle_sound_effect_button['image'] = self.Images['Sound_effects_play']
-        else:
-            self.toggle_sound_effect_button['image'] = self.Images['Sound_effects_mute']
-        self.toggle_sound_effect_button.pack(side='left', anchor='nw')
-
-    def _main_menu(self):
-        self.frames['main'] = tk.Frame()
-
-        self.current_audio = AUDIO.MENU_MUSIC
-
-        word_length_opt = [
-            '6',
-            '7',
-            '8',
-            '9',
-            '10'
-        ]
-
-        current_length = tk.StringVar(self.frames['main'])
-        current_length.set(str(self.game.return_options('Word_length')))
-        word_lenght = tk.OptionMenu(self.frames['main'], current_length, *word_length_opt)
-        word_lenght.pack()
-
-
-        play_button = tk.Button(self.frames['main'],text='Play',
-            command=lambda: (self.frames['main'].pack_forget(),
-            self.play_sound_effect(AUDIO.DEFAUL_BUTTON_SE),
-            self._game_menu()),
-            relief='flat',
-            image=self.Images['Play_button'])
-        play_button.image = self.Images['Play_button']
-        play_button.pack()
-
-        option_button = tk.Button(self.frames['main'],
-            text='Options',
-            relief='flat',
-            state='disabled',
-            font=self.test_font)
-        option_button.pack()
-
-        instruction_button = tk.Button(self.frames['main'],
-            text='Instructions',
-            relief='flat',
-            state='disabled',
-            font=self.test_font)
-        instruction_button.pack()
-
-        exit_button = tk.Button(self.frames['main'],
-            text='Exit',
-            relief='flat',
-            command=lambda:(quit()),
-            font=self.test_font)
-        exit_button.pack()
-
-        self.frames['main'].pack()
-
-    def _instruction_menu(self):
-        frame = tk.Frame()
-        frame.pack()
 
     def music_loop(self):
         #
@@ -161,6 +78,160 @@ class ui_handler():
         elif (isinstance(self.music_loop_obj, sa.PlayObject)):
             if self.music_loop_obj.is_playing():
                 self.music_loop_obj.stop()
+
+    def play_sound_effect(self, key):
+        if (self.is_play_sound_effect == 'True'):
+            self.play_obj.append(self.wave_obj[key].play())
+   
+    def audio_control(self):
+        #Updates the image for the music and SE button according to their state
+        #Both are updated to keep them in order
+        if self.is_play_music_loop == 'True':
+            self.toggle_music_loop_button['image'] = self.IMAGES['music_play']
+        else:
+            self.toggle_music_loop_button['image'] = self.IMAGES['music_mute']
+        self.toggle_music_loop_button.pack(side='left', anchor='nw')
+
+        if self.is_play_sound_effect == 'True':
+            self.toggle_sound_effect_button['image'] = self.IMAGES['Sound_effects_play']
+        else:
+            self.toggle_sound_effect_button['image'] = self.IMAGES['Sound_effects_mute']
+        self.toggle_sound_effect_button.pack(side='left', anchor='nw')
+
+    def toggle_music(self):
+        if self.is_play_music_loop == 'True':
+            self.is_play_music_loop = 'False'
+        else:
+            self.is_play_music_loop = 'True'
+        self.game.change_options('Music', self.is_play_music_loop)
+        self.audio_control()
+
+    def toggle_sound_effect(self):
+        if self.is_play_sound_effect == 'True':
+            self.is_play_sound_effect = 'False'
+            for se in self.play_obj:
+                se.stop()
+            self.play_obj.clear()
+        else:
+            self.is_play_sound_effect = 'True'
+        self.game.change_options('Sound_effects', self.is_play_sound_effect)
+        self.audio_control()
+
+
+
+
+
+    def load_images(self):
+        self.IMAGES = {}
+        self.IMAGES['Play_button'] = tk.PhotoImage(file='Assets/Image/Play_button.pbm')
+        self.IMAGES['Sound_effects_play'] = tk.PhotoImage(file='Assets/Image/Speaker_icon.pbm')
+        self.IMAGES['Sound_effects_mute'] = tk.PhotoImage(file='Assets/Image/Mute_icon.pbm')
+        self.IMAGES['music_play'] = tk.PhotoImage(file='Assets/Image/Linecons_quaver.pbm')
+        self.IMAGES['music_mute'] = tk.PhotoImage(file='Assets/Image/Linecons_quaver_mute.pbm')
+        self.IMAGES['instructions'] = tk.PhotoImage(file='Assets/Image/Instructions.pbm')
+        for i in range(1, 9):
+            path = 'Hangman_{}'.format(i)
+            self.IMAGES[path] = tk.PhotoImage(file='Assets/Image/{}.pbm'.format(path))
+            
+
+    
+    def _main_menu(self):
+        self.frames['main'] = tk.Frame()
+        self.frames['main'].pack()
+
+        self.current_audio = AUDIO.MENU_MUSIC
+
+        game_start_lable_frame = tk.LabelFrame(self.frames['main'])
+        game_start_lable_frame.pack()
+
+        word_length_opt = [
+            '6',
+            '7',
+            '8',
+            '9',
+            '10',
+            '11',
+            '12',
+            '13',
+            '14',
+            '15',
+            ]
+
+        self.current_length = tk.StringVar(self.frames['main'])
+        self.current_length.set(str(self.game.return_options('Word_length')))
+        word_lenght = tk.OptionMenu(game_start_lable_frame, self.current_length, *word_length_opt)
+        word_lenght.pack(side='right')
+
+
+        play_button = tk.Button(
+            game_start_lable_frame,
+            text='Play',
+            command=lambda: (self.frames['main'].pack_forget(),
+            self.play_sound_effect(AUDIO.DEFAUL_BUTTON_SE),
+            self._word_len_opt(),
+            self._game_menu()),
+            relief='flat',
+            image=self.IMAGES['Play_button']
+            )
+        play_button.image = self.IMAGES['Play_button']
+        play_button.pack(side='left')
+
+        option_button = tk.Button(
+            self.frames['main'],
+            text='Options',
+            relief='flat',
+            state='disabled',
+            font=self.test_font,
+            )
+        option_button.pack()
+
+        instruction_button = tk.Button(
+            self.frames['main'],
+            text='Instructions',
+            relief='flat',
+            state='active',
+            font=self.test_font,
+            command=lambda:(self.frames['main'].pack_forget(),
+            self.play_sound_effect(AUDIO.DEFAUL_BUTTON_SE),
+            self._instruction_menu())
+            )
+        instruction_button.pack()
+
+        exit_button = tk.Button(self.frames['main'],
+            text='Exit',
+            relief='flat',
+            command=lambda:(quit()),
+            font=self.test_font
+            )
+        exit_button.pack()
+
+        
+
+    def _word_len_opt(self):
+        new_length =  self.current_length.get()
+        self.game.change_options('Word_length', new_length)
+
+
+    def _instruction_menu(self):
+        self.frames['instructions'] = tk.Frame()
+        self.frames['instructions'].pack()
+
+        instruction_image_label = tk.Label(self.frames['instructions'],
+            image=self.IMAGES['instructions'],
+            relief='solid')
+        instruction_image_label.pack()
+
+        back_main_menu_button = tk.Button(self.frames['instructions'], text="Back to main menu",
+            command=lambda:(self.frames['instructions'].pack_forget(),
+             self._main_menu()),
+            relief="flat")
+        back_main_menu_button.pack(
+            side="bottom",
+            anchor='sw'
+            )
+
+
+    
             
     def _game_menu(self):
         self.current_audio = AUDIO.GAME_MUSIC
@@ -170,7 +241,7 @@ class ui_handler():
         self.frames['game'].bind_all('<Key>', self._game_input)
         self.game.start()
         self.game_end = False
-        
+
         self.hangman_label = tk.Label(self.frames['game'],
             relief='solid')
         self.update_hangman()
@@ -207,7 +278,7 @@ class ui_handler():
         self.guessed_word_labelframe.pack()
 
         back_button = tk.Button(self.frames['game'],text='Back',
-            relief='flat',
+            relief='groove',
             command=lambda:(self.frames['game'].pack_forget(),self._main_menu()),
             font=self.test_font)
 
@@ -273,35 +344,13 @@ class ui_handler():
 
         frame.pack()
 
-    def toggle_music(self):
-        if self.is_play_music_loop == 'True':
-            self.is_play_music_loop = 'False'
-        else:
-            self.is_play_music_loop = 'True'
-        self.game.change_options('Music', self.is_play_music_loop)
-        self.audio_control()
-
-    def play_sound_effect(self, key):
-        if (self.is_play_sound_effect == 'True'):
-            self.play_obj.append(self.wave_obj[key].play())
-
-    def toggle_sound_effect(self):
-        if self.is_play_sound_effect == 'True':
-            self.is_play_sound_effect = 'False'
-            for se in self.play_obj:
-                se.stop()
-            self.play_obj.clear()
-        else:
-            self.is_play_sound_effect = 'True'
-        self.game.change_options('Sound_effects', self.is_play_sound_effect)
-        self.audio_control()
-
+    
     def update_hangman(self):
         img_num = self.game.return_count()
         if img_num <= 7:
             current_hangman = 'Hangman_{}'.format(self.game.return_count()+1)
-            self.hangman_label['image'] = self.Images[current_hangman]
-            self.hangman_label.image = self.Images[current_hangman]
+            self.hangman_label['image'] = self.IMAGES[current_hangman]
+            self.hangman_label.image = self.IMAGES[current_hangman]
             self.hangman_label.pack()
         
 
