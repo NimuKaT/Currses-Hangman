@@ -15,13 +15,14 @@ class AUDIO(Enum):
     #Values for music
     MENU_MUSIC = 0,
     GAME_MUSIC = 1,
-    GAME_WIN_MUSIC = 2,
-    GAME_LOSE_MUSIC = 3
 
     #Values for sound effects
+    GAME_WIN_SE = 2,
+    GAME_LOSE_SE = 3,
     DEFAUL_BUTTON_SE = 4,
     IN_WORD = 5,
     NOT_IN_WORD = 6,
+    NULL =7
 
 
 class ui_handler():
@@ -31,16 +32,6 @@ class ui_handler():
         master.title('Hangman')
         master.minsize(1330, 720)
         master.maxsize(1330, 720)
-
-        #Create background image
-        bg_frame = tk.Label(
-            master,
-            bg='pink'
-            )
-        bg_frame.place(
-            relwidth=1,
-            relheight=1
-            )
 
         #Initializes base variables
         self.master = master
@@ -56,9 +47,21 @@ class ui_handler():
         self.frames =  {}
         self.load_audio()
         self.load_images()
+        self.DEFAULT_BG = 'pink'
+        self.BUTTON_BG = 'grey'
+
+        #Create background image
+        bg_frame = tk.Label(
+            master,
+            bg=self.DEFAULT_BG
+            )
+        bg_frame.place(
+            relwidth=1,
+            relheight=1
+            )
         
         #Creates a frame containing the audio toggle buttons
-        self.control_frame = tk.Frame(self.master)
+        self.control_frame = tk.Frame(self.master, bg=self.DEFAULT_BG)
         self.control_frame.pack(anchor='nw', side='left')
         self.toggle_music_loop_button = tk.Button(self.control_frame,
             text='music',
@@ -68,7 +71,7 @@ class ui_handler():
         self.toggle_sound_effect_button = tk.Button(self.control_frame,
             text='SE',
             command=self.toggle_sound_effect,
-            relief='solid'
+            relief='groove'
             )
         self.audio_control()
 
@@ -82,17 +85,21 @@ class ui_handler():
         self.WAVE_OBJ[AUDIO.MENU_MUSIC] = sa.WaveObject.from_wave_file('Assets/audio/Lobby_music.wav')
         self.WAVE_OBJ[AUDIO.GAME_MUSIC] = sa.WaveObject.from_wave_file('Assets/audio/Game_music.wav')
         self.WAVE_OBJ[AUDIO.DEFAUL_BUTTON_SE] = sa.WaveObject.from_wave_file('Assets/audio/Blop_Mark_DiAngelo_79054334.wav')
-        self.WAVE_OBJ[AUDIO.GAME_WIN_MUSIC] = sa.WaveObject.from_wave_file('simpleaudio/test_audio/e.wav')
-        self.WAVE_OBJ[AUDIO.GAME_LOSE_MUSIC] = sa.WaveObject.from_wave_file('simpleaudio/test_audio/g.wav')
-        self.WAVE_OBJ[AUDIO.IN_WORD] = sa.WaveObject.from_wave_file('simpleaudio/test_audio/e.wav')
-        self.WAVE_OBJ[AUDIO.NOT_IN_WORD] = sa.WaveObject.from_wave_file('simpleaudio/test_audio/g.wav')
+        self.WAVE_OBJ[AUDIO.GAME_WIN_SE] = sa.WaveObject.from_wave_file('Assets/audio/win.wav')
+        self.WAVE_OBJ[AUDIO.GAME_LOSE_SE] = sa.WaveObject.from_wave_file('Assets/audio/fail.wav')
+        self.WAVE_OBJ[AUDIO.IN_WORD] = sa.WaveObject.from_wave_file('Assets/audio/correct.wav')
+        self.WAVE_OBJ[AUDIO.NOT_IN_WORD] = sa.WaveObject.from_wave_file('Assets/audio/wrong.wav')
 
     def music_loop(self):
         
         #Is called by the main loop and runs the selected music under 'current_audio'
         #if 'is_play_music_loop' is true. It re-initializes the PlayObject if is
         #has finished running as 'music_loop_obj'
-        if self.is_play_music_loop == 'True':
+        if self.current_audio == AUDIO.NULL:
+            if (isinstance(self.music_loop_obj, sa.PlayObject)):
+                if self.music_loop_obj.is_playing():
+                    self.music_loop_obj.stop()
+        elif self.is_play_music_loop == 'True':
 
             #Checks whether the selected audio track under 'current_audio' is equal
             #to that of the 'playing_audio_loop' and if not terminates the current
@@ -174,9 +181,10 @@ class ui_handler():
         self.IMAGES['sound_effects_off'] = tk.PhotoImage(file='Assets/Image/Mute_icon.pbm')
         self.IMAGES['music_play'] = tk.PhotoImage(file='Assets/Image/Linecons_quaver.pbm')
         self.IMAGES['music_mute'] = tk.PhotoImage(file='Assets/Image/Linecons_quaver_mute.pbm')
-        self.IMAGES['instructions'] = tk.PhotoImage(file='Assets/Image/Instructions.pbm')
-        self.IMAGES['logo'] = tk.PhotoImage(file='Assets/Image/Hangman_8.pbm')
-        self.IMAGES['win'] = tk.PhotoImage(file='Assets/Image/Hangman_8.pbm')
+        self.IMAGES['instructions_1'] = tk.PhotoImage(file='Assets/Image/Instructions_1.pbm')
+        self.IMAGES['instructions_2'] = tk.PhotoImage(file='Assets/Image/Instructions_2.pbm')
+        self.IMAGES['logo'] = tk.PhotoImage(file='Assets/Image/Logo.pbm')
+        self.IMAGES['win'] = tk.PhotoImage(file='Assets/Image/Hangman_win.pbm')
         self.IMAGES['loss'] = tk.PhotoImage(file='Assets/Image/Hangman_8.pbm')
         for i in range(1, 9):
             path = 'Hangman_{}'.format(i)
@@ -188,7 +196,7 @@ class ui_handler():
         self.control_frame.pack(anchor='nw', side='left')
        
         #Initialize main menu frame
-        self.frames['main'] = tk.Frame(self.master)
+        self.frames['main'] = tk.Frame(self.master, bg=self.DEFAULT_BG)
         self.frames['main'].pack()
        
         #Selects current audio
@@ -197,13 +205,15 @@ class ui_handler():
         #Places game logo
         game_logo = tk.Label(
             self.frames['main'],
-            image=self.IMAGES['logo'])
+            image=self.IMAGES['logo'],
+            relief='solid')
         game_logo.image = self.IMAGES['logo']
         game_logo.pack()
 
         #Creates label frame containing the play button and word length drop down
         game_start_lable_frame = tk.LabelFrame(
-            self.frames['main']
+            self.frames['main'],
+            bg=self.BUTTON_BG
             )
         game_start_lable_frame.pack()
 
@@ -230,7 +240,8 @@ class ui_handler():
             self.current_length,
             *word_length_opt
             )
-        word_lenght_menu.config(font=self.button_font, relief='groove')
+        word_lenght_menu.config(font=self.button_font, relief='groove',
+            bg=self.BUTTON_BG)
         word_lenght_menu.pack(side='right')
 
         #Creates a button within 'game_start_label_frame', which clears the main menu
@@ -243,7 +254,9 @@ class ui_handler():
             self._word_len_opt(),
             self._game_menu()),
             relief='flat',
-            image=self.IMAGES['play_button']
+            font=self.button_font,
+            bg=self.BUTTON_BG
+            #image=self.IMAGES['play_button']
             )
         play_button.image = self.IMAGES['play_button']
         play_button.pack(side='left')
@@ -254,8 +267,8 @@ class ui_handler():
             self.frames['main'],
             text='Options',
             relief='flat',
-            state='active',
             font=self.button_font,
+            bg=self.BUTTON_BG,
             command=lambda:(self.frames['main'].pack_forget(),
             self.play_sound_effect(AUDIO.DEFAUL_BUTTON_SE),
             self._option_menu())
@@ -268,8 +281,8 @@ class ui_handler():
             self.frames['main'],
             text='Instructions',
             relief='flat',
-            state='active',
             font=self.button_font,
+            bg=self.BUTTON_BG,
             command=lambda:(self.frames['main'].pack_forget(),
             self.play_sound_effect(AUDIO.DEFAUL_BUTTON_SE),
             self._instruction_menu())
@@ -280,8 +293,10 @@ class ui_handler():
         exit_button = tk.Button(self.frames['main'],
             text='Exit',
             relief='flat',
+            bg=self.BUTTON_BG,
             command=lambda:(quit()),
             font=self.button_font
+
             )
         exit_button.pack()
 
@@ -295,37 +310,51 @@ class ui_handler():
         self.control_frame.pack_forget()
         
         #Creates the frame for instruction
-        self.frames['instructions'] = tk.Frame(self.master)
+        self.frames['instructions'] = tk.Frame(self.master, bg=self.DEFAULT_BG)
         self.frames['instructions'].pack()
 
         #Creates label containing heading
         instruction_label = tk.Label(self.frames['instructions'],
             text='Instructions',
             relief='flat',
-            font=self.button_font)
+            font=self.button_font,
+            bg=self.DEFAULT_BG)
         instruction_label.pack()
 
         #Creates label containing the image for instructions
-        instruction_image_label = tk.Label(self.frames['instructions'],
-            image=self.IMAGES['instructions'],
+        self.current_instruction = 1
+        self.instruction_image_label = tk.Label(self.frames['instructions'],
+            image=self.IMAGES['instructions_1'],
             relief='solid')
-        instruction_image_label.pack()
+        self.instruction_image_label.bind('<Button-1>', self.toggle_instruction)
+        self.instruction_image_label.pack()
 
         #Creates button which closes the current frame and return to the main menu
         back_main_menu_button = tk.Button(self.frames['instructions'], text="Back to main menu",
             command=lambda:(self.frames['instructions'].pack_forget(),
              self._main_menu()),
             relief="flat",
-            font=self.button_font
+            font=self.button_font,
+            bg=self.BUTTON_BG
             )
         back_main_menu_button.pack(
             side="bottom",
             anchor='sw'
             )
 
+    def toggle_instruction(self, event):
+        #Toggles the instruction image from 1 to 2 and vise versa
+        if self.current_instruction == 1:
+            self.instruction_image_label.config(image=self.IMAGES['instructions_2'])
+            self.current_instruction = 2
+        else:
+            self.current_instruction = 1
+            self.instruction_image_label.config(image=self.IMAGES['instructions_1'])
+        self.instruction_image_label.bind('<Button-1>', self.toggle_instruction)
+
     def _option_menu(self):
         self.control_frame.pack_forget()
-        self.frames['options'] = tk.Frame(self.master)
+        self.frames['options'] = tk.Frame(self.master, bg=self.DEFAULT_BG)
         self.frames['options'].pack(pady=50, expand=True)
         LABEL_WIDTH = 30
         BUTTON_WIDTH = 8
@@ -333,17 +362,20 @@ class ui_handler():
         #Title label for the frame
         title_label = tk.Label(self.frames['options'],
             text='Options',
-            font=self.button_font)
+            font=self.button_font,
+            bg=self.DEFAULT_BG)
         title_label.pack(pady=30)
 
         #Label frame which contains the dictionary configurations
-        dictionary_option_label_frame = tk.LabelFrame(self.frames['options'])
+        dictionary_option_label_frame = tk.LabelFrame(self.frames['options'],
+            bg=self.BUTTON_BG)
         dictionary_option_label_frame.pack()
         
         dictionary_label = tk.Label(dictionary_option_label_frame,
             text='Dictionary',
             font=self.button_font,
-            width=LABEL_WIDTH
+            width=LABEL_WIDTH,
+            bg=self.BUTTON_BG
             )
         dictionary_label.grid(column=0, row=0)
         
@@ -352,9 +384,10 @@ class ui_handler():
         dictionary_button_custom = tk.Button(dictionary_option_label_frame,
             text='Custom',
             font=self.button_font,
+            bg=self.BUTTON_BG,
             width=BUTTON_WIDTH,
             command=lambda:(dictionary_button_custom.config(relief='sunken', state='disabled'),
-                dictionary_button_default.config(relief='raised', state='active'),
+                dictionary_button_default.config(relief='raised', state='normal'),
                 self.game.change_options('Dictionary', 'Custom'))
             )
         dictionary_button_custom.grid(column=1, row=0)
@@ -365,7 +398,8 @@ class ui_handler():
             text='Default',
             font=self.button_font,
             width=BUTTON_WIDTH,
-            command=lambda:(dictionary_button_custom.config(relief='raised', state='active'),
+            bg=self.BUTTON_BG,
+            command=lambda:(dictionary_button_custom.config(relief='raised', state='normal'),
                 dictionary_button_default.config(relief='sunken', state='disabled'),
                 self.game.change_options('Dictionary', 'Default'))
             )
@@ -375,18 +409,20 @@ class ui_handler():
         #Default option is the Default button
         if self.game.return_options('Dictionary') == 'Custom':
             dictionary_button_custom.config(relief='sunken', state='disabled')
-            dictionary_button_default.config(relief='raised', state='active')
+            dictionary_button_default.config(relief='raised', state='normal')
         else:
-            dictionary_button_custom.config(relief='raised', state='active')
+            dictionary_button_custom.config(relief='raised', state='normal')
             dictionary_button_default.config(relief='sunken', state='disabled')
 
         #Label frame which contains the music configurations
-        musci_option_label_frame = tk.LabelFrame(self.frames['options'])
+        musci_option_label_frame = tk.LabelFrame(self.frames['options'],
+            bg=self.BUTTON_BG)
         musci_option_label_frame.pack()
         
         music_label = tk.Label(musci_option_label_frame,
             text='Music',
             font=self.button_font,
+            bg=self.BUTTON_BG,
             width=LABEL_WIDTH
             )
         music_label.grid(column=0, row=0)
@@ -397,8 +433,9 @@ class ui_handler():
             text='On',
             font=self.button_font,
             width=BUTTON_WIDTH,
+            bg=self.BUTTON_BG,
             command=lambda:(music_button_on.config(relief='sunken', state='disabled'),
-                music_button_off.config(relief='raised', state='active'),
+                music_button_off.config(relief='raised', state='normal'),
                 self.toggle_music()
                 )
             )
@@ -410,7 +447,8 @@ class ui_handler():
             text='Off',
             font=self.button_font,
             width=BUTTON_WIDTH,
-            command=lambda:(music_button_on.config(relief='raised', state='active'),
+            bg=self.BUTTON_BG,
+            command=lambda:(music_button_on.config(relief='raised', state='normal'),
                 music_button_off.config(relief='sunken', state='disabled'),
                 self.toggle_music()
                 )
@@ -421,16 +459,18 @@ class ui_handler():
         #Default option is the off button
         if self.game.return_options("Music") == 'True':
             music_button_on.config(relief='sunken', state='disabled')
-            music_button_off.config(relief='raised', state='active')
+            music_button_off.config(relief='raised', state='normal')
         else:
-            music_button_on.config(relief='raised', state='active')
+            music_button_on.config(relief='raised', state='normal')
             music_button_off.config(relief='sunken', state='disabled')
 
         #Label frame which contains the music configurations
-        sound_effects_option_label_frame = tk.LabelFrame(self.frames['options'])
+        sound_effects_option_label_frame = tk.LabelFrame(self.frames['options'],
+            bg=self.BUTTON_BG)
         sound_effects_option_label_frame.pack()
         sound_effect_label = tk.Label(sound_effects_option_label_frame,
             text='Sound Effects',
+            bg=self.BUTTON_BG,
             font=self.button_font,
             width=LABEL_WIDTH
             )
@@ -442,9 +482,10 @@ class ui_handler():
             text='On',
             font=self.button_font,
             width=BUTTON_WIDTH,
+            bg=self.BUTTON_BG,
             command=lambda:(
                 sound_effect_button_on.config(relief='sunken', state='disabled'),
-                sound_effect_button_off.config(relief='raised', state='active'),
+                sound_effect_button_off.config(relief='raised', state='normal'),
                 self.toggle_sound_effect())
             )
         sound_effect_button_on.grid(column=1, row=0)
@@ -455,8 +496,9 @@ class ui_handler():
             text='Off',
             font=self.button_font,
             width=BUTTON_WIDTH,
+            bg=self.BUTTON_BG,
             command=lambda:(
-                sound_effect_button_on.config(relief='raised', state='active'),
+                sound_effect_button_on.config(relief='raised', state='normal'),
                 sound_effect_button_off.config(relief='sunken', state='disabled'),
                 self.toggle_sound_effect())
             )
@@ -466,9 +508,9 @@ class ui_handler():
         #Default option is the off button
         if self.game.return_options("Sound_effects") == 'True':
             sound_effect_button_on.config(relief='sunken', state='disabled')
-            sound_effect_button_off.config(relief='raised', state='active')
+            sound_effect_button_off.config(relief='raised', state='normal')
         else:
-            sound_effect_button_on.config(relief='raised', state='active')
+            sound_effect_button_on.config(relief='raised', state='normal')
             sound_effect_button_off.config(relief='sunken', state='disabled')
 
         #Creates a button that returns to main menu
@@ -476,7 +518,8 @@ class ui_handler():
             command=lambda:(self.frames['options'].pack_forget(),
              self._main_menu()),
             relief="flat",
-            font=self.button_font
+            font=self.button_font,
+            bg=self.BUTTON_BG
             )
         back_main_menu_button.pack(
             side="bottom"
@@ -487,7 +530,8 @@ class ui_handler():
         self.current_audio = AUDIO.GAME_MUSIC
         self.frames['game'] = tk.Frame(self.master,
             height=100,
-            width=100
+            width=100,
+            bg=self.DEFAULT_BG
             )
 
         #Binds the game menu frame so that when a key is pressed it will
@@ -502,7 +546,8 @@ class ui_handler():
         #Label which contains the image of hangman
         self.hangman_label = tk.Label(
             self.frames['game'],
-            relief='solid'
+            relief='solid',
+            bg=self.DEFAULT_BG
             )
         self.update_hangman()
         self.hangman_label.pack()
@@ -515,7 +560,8 @@ class ui_handler():
         mystery_word_label = tk.Label(
             self.frames['game'],
             textvariable=self.mystery_word,
-            font=self.button_font
+            font=self.button_font,
+            bg=self.DEFAULT_BG
             )
         mystery_word_label.pack()
 
@@ -524,7 +570,9 @@ class ui_handler():
         error_label = tk.Label(
             self.frames['game'],
             textvariable=self.error,
-            fg='red'
+            fg='red',
+            bg=self.DEFAULT_BG,
+            font=self.button_font
             )
         error_label.pack()
 
@@ -532,7 +580,8 @@ class ui_handler():
         #they are guessed
         self.guessed_word_labelframe = tk.LabelFrame(
             self.frames['game'],
-            relief='flat'
+            relief='flat',
+            bg=self.DEFAULT_BG
             )
         self.guessed_word_labelframe.pack()
 
@@ -548,7 +597,8 @@ class ui_handler():
             self.guessed_word_labels[chr(97+i)] = tk.Label(
                 self.guessed_word_labelframe,
                 text=chr(97+i),
-                font=self.button_font
+                font=self.button_font,
+                bg=self.DEFAULT_BG
                 )
             self.guessed_word_labels[chr(97+i)].grid(column=col,row=row)
         
@@ -557,6 +607,7 @@ class ui_handler():
             self.frames['game'],
             text='Back',
             relief='groove',
+            bg=self.BUTTON_BG,
             command=lambda:(self.frames['game'].pack_forget(),
                 self._main_menu()),
             font=self.button_font
@@ -586,13 +637,13 @@ class ui_handler():
                     #and plays a correct sound
                     self.mystery_word.set(self.game.get_mystery_word())
                     self.play_sound_effect(AUDIO.IN_WORD)
-                    self.guessed_word_labels[input] = tk.Label(self.guessed_word_labelframe, text=input, fg='green', font=self.button_font)
+                    self.guessed_word_labels[input].config(fg='green')
                 else:
                    
                     #Changes the guessed character to red and plays a wrong sound
                     self.error.set("{} is not in word".format(input))
                     self.play_sound_effect(AUDIO.NOT_IN_WORD)
-                    self.guessed_word_labels[input] = tk.Label(self.guessed_word_labelframe, text=input, fg='red', font=self.button_font)
+                    self.guessed_word_labels[input].config(fg='red')
                 
                 #Gets the position of the label withing the grid and places it accordingly
                 char_num = ord(input) - 97
@@ -616,14 +667,16 @@ class ui_handler():
                  
     def result_menu(self, win):
         self.audio_control()
-        self.frames['result'] = tk.Frame()
+        self.frames['result'] = tk.Frame(self.master, bg=self.DEFAULT_BG)
+        self.current_audio = AUDIO.NULL
         
         #Creates a variable label which contains output regarding their results
         result_str = tk.StringVar()
         result_label = tk.Label(
             self.frames['result'],
             textvariable=result_str,
-            font=self.button_font)
+            font=self.button_font,
+            bg=self.DEFAULT_BG)
         if win:
             
             #Assigns output text and image when won
@@ -631,10 +684,11 @@ class ui_handler():
             result_label.config(fg='green')
             result_image = tk.Label(
                 self.frames['result'],
-                image=self.IMAGES['win']
+                image=self.IMAGES['win'],
+                relief='solid'
                 )
             result_image.image = self.IMAGES['win']
-            self.current_audio = AUDIO.GAME_WIN_MUSIC
+            self.play_sound_effect(AUDIO.GAME_WIN_SE)
         else:
             
             #Assigns output text and image when lost
@@ -642,10 +696,11 @@ class ui_handler():
             result_label.config(fg='red')
             result_image = tk.Label(
                 self.frames['result'],
-                image=self.IMAGES['loss']
+                image=self.IMAGES['loss'],
+                relief='solid'
                 )
             result_image.image = self.IMAGES['loss']
-            self.current_audio = AUDIO.GAME_LOSE_MUSIC
+            self.play_sound_effect(AUDIO.GAME_LOSE_SE)
         result_image.pack()
         result_label.pack()
 
@@ -655,7 +710,8 @@ class ui_handler():
             self.WAVE_OBJ[AUDIO.DEFAUL_BUTTON_SE].play(),
             self._game_menu()),
             relief='groove',
-            font=self.button_font
+            font=self.button_font,
+            bg=self.BUTTON_BG
             )
         play_again_button.pack()
 
@@ -667,7 +723,8 @@ class ui_handler():
                 self.frames['result'].pack_forget(),
                 self._main_menu()),
             relief="groove",
-            font=self.button_font
+            font=self.button_font,
+            bg=self.BUTTON_BG
             )
         back_to_menu_button.pack(side="top")
 
